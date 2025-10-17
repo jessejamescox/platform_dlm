@@ -19,6 +19,7 @@ import loadRouter from './api/load.js';
 import energyRouter from './api/energy.js';
 import schedulesRouter from './api/schedules.js';
 import analyticsRouter from './api/analytics.js';
+import aiConfigRouter from './api/ai-config.js';
 
 // Load environment variables
 dotenv.config();
@@ -98,6 +99,7 @@ app.use('/api/load', loadRouter);
 app.use('/api/energy', energyRouter);
 app.use('/api/schedules', schedulesRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/ai-config', aiConfigRouter);
 
 // System info endpoint
 app.get('/api/system/info', (req, res) => {

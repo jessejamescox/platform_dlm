@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { stationsAPI } from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { BatteryCharging, Plus, Trash2, Power } from 'lucide-react';
+import { BatteryCharging, Plus, Trash2, Power, Sparkles } from 'lucide-react';
 import StationModal from '../components/StationModal';
+import AIUploadModal from '../components/AIUploadModal';
 
 export default function Stations() {
   const [stations, setStations] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { data } = useWebSocket();
 
@@ -43,6 +45,10 @@ export default function Stations() {
     }
   };
 
+  const handleAIStationCreated = async (station) => {
+    await loadStations();
+  };
+
   const handleDeleteStation = async (stationId, stationName) => {
     if (!confirm(`Are you sure you want to delete "${stationName}"?`)) {
       return;
@@ -76,10 +82,16 @@ export default function Stations() {
             Manage and monitor your EV charging stations
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          <Plus size={18} />
-          Add Station
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          <button className="btn btn-secondary" onClick={() => setShowAIModal(true)}>
+            <Sparkles size={18} />
+            AI Setup
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <Plus size={18} />
+            Add Station
+          </button>
+        </div>
       </div>
 
       {stations.length === 0 ? (
@@ -87,12 +99,18 @@ export default function Stations() {
           <BatteryCharging size={48} style={{ color: 'var(--text-muted)', margin: '0 auto var(--spacing-md)' }} />
           <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Stations Found</h3>
           <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--spacing-lg)' }}>
-            Get started by adding your first charging station
+            Get started by adding your first charging station manually or use AI to parse a manual
           </p>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <Plus size={18} />
-            Add Station
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'center' }}>
+            <button className="btn btn-secondary" onClick={() => setShowAIModal(true)}>
+              <Sparkles size={18} />
+              AI Setup
+            </button>
+            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+              <Plus size={18} />
+              Add Station
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-2">
@@ -172,6 +190,13 @@ export default function Stations() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={handleAddStation}
+      />
+
+      {/* AI Upload Modal */}
+      <AIUploadModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        onStationCreated={handleAIStationCreated}
       />
     </div>
   );
