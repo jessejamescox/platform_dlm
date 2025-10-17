@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install --production
 
 # Copy application source
 COPY src ./src
@@ -16,7 +16,7 @@ COPY src ./src
 RUN mkdir -p /app/persistence /app/logs
 
 # Expose ports
-EXPOSE 3000 3001
+EXPOSE 3000 3001 9000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \

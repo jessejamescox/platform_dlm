@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { stationsAPI } from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { BatteryCharging, Plus, Trash2, Power } from 'lucide-react';
+import StationModal from '../components/StationModal';
 
 export default function Stations() {
   const [stations, setStations] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { data } = useWebSocket();
 
   useEffect(() => {
@@ -23,6 +26,34 @@ export default function Stations() {
       setStations(response.data);
     } catch (error) {
       console.error('Error loading stations:', error);
+    }
+  };
+
+  const handleAddStation = async (stationData) => {
+    setLoading(true);
+    try {
+      await stationsAPI.create(stationData);
+      setShowModal(false);
+      await loadStations();
+    } catch (error) {
+      console.error('Error adding station:', error);
+      alert(`Failed to add station: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteStation = async (stationId, stationName) => {
+    if (!confirm(`Are you sure you want to delete "${stationName}"?`)) {
+      return;
+    }
+
+    try {
+      await stationsAPI.delete(stationId);
+      await loadStations();
+    } catch (error) {
+      console.error('Error deleting station:', error);
+      alert(`Failed to delete station: ${error.message}`);
     }
   };
 
@@ -45,7 +76,7 @@ export default function Stations() {
             Manage and monitor your EV charging stations
           </p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           <Plus size={18} />
           Add Station
         </button>
@@ -58,7 +89,7 @@ export default function Stations() {
           <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--spacing-lg)' }}>
             Get started by adding your first charging station
           </p>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
             <Plus size={18} />
             Add Station
           </button>
@@ -123,7 +154,10 @@ export default function Stations() {
                     <Power size={16} />
                     Details
                   </button>
-                  <button className="btn btn-danger">
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDeleteStation(station.id, station.name)}
+                  >
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -132,6 +166,13 @@ export default function Stations() {
           ))}
         </div>
       )}
+
+      {/* Add Station Modal */}
+      <StationModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleAddStation}
+      />
     </div>
   );
 }

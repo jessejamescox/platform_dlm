@@ -33,12 +33,28 @@ services:
     ports:
       - "3000:3000"
       - "3001:3001"
+      - "9000:9000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - WS_PORT=3001
+      - OCPP_PORT=9000
       - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=your-super-secret-token
+      - INFLUXDB_ORG=wago_dlm
+      - INFLUXDB_BUCKET=charging_data
       - MQTT_BROKER_URL=mqtt://mqtt:1883
+      - MAX_GRID_CAPACITY_KW=500
+      - PEAK_DEMAND_THRESHOLD_KW=450
+      - MIN_CHARGING_POWER_KW=3.7
+      - MAX_CHARGING_POWER_PER_STATION_KW=22
+      - ENERGY_COST_PER_KWH=0.12
+      - PEAK_COST_PER_KWH=0.25
+      - ENABLE_PV_EXCESS_CHARGING=true
+      - ENABLE_LOAD_BALANCING=true
+      - PV_SYSTEM_ENABLED=true
+      - PV_MAX_CAPACITY_KW=100
+      - ENABLE_SCHEDULING=true
     volumes:
       - ./persistence:/app/persistence
       - ./logs:/app/logs

@@ -5,12 +5,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ModbusDriver } from '../protocols/ModbusDriver.js';
 import { MQTTDriver } from '../protocols/MQTTDriver.js';
+import { OCPPDriver } from '../protocols/OCPPDriver.js';
 
 export class ChargingStationManager {
   constructor(state) {
     this.state = state;
     this.drivers = new Map();
     this.pollingIntervals = new Map();
+    this.ocppTransactions = new Map(); // stationId -> transactionId
   }
 
   async initialize() {
@@ -19,8 +21,10 @@ export class ChargingStationManager {
     // Initialize protocol drivers
     this.modbusDriver = new ModbusDriver();
     this.mqttDriver = new MQTTDriver(process.env.MQTT_BROKER_URL);
+    this.ocppDriver = new OCPPDriver(parseInt(process.env.OCPP_PORT) || 9000);
 
     await this.mqttDriver.connect();
+    await this.ocppDriver.start();
 
     console.log('✅ Charging Station Manager initialized');
   }
@@ -103,13 +107,17 @@ export class ChargingStationManager {
         await this.initializeModbusStation(station);
       } else if (station.protocol === 'mqtt') {
         await this.initializeMQTTStation(station);
+      } else if (station.protocol === 'ocpp') {
+        await this.initializeOCPPStation(station);
       }
 
       station.online = true;
       station.status = 'ready';
 
-      // Start polling for status updates
-      this.startStationPolling(station);
+      // Start polling for status updates (not needed for OCPP)
+      if (station.protocol !== 'ocpp') {
+        this.startStationPolling(station);
+      }
 
     } catch (error) {
       console.error(`Failed to initialize station ${station.id}:`, error.message);
@@ -292,6 +300,8 @@ export class ChargingStationManager {
       await this.setPowerModbus(station, clampedPower);
     } else if (station.protocol === 'mqtt') {
       await this.setPowerMQTT(station, clampedPower);
+    } else if (station.protocol === 'ocpp') {
+      await this.setPowerOCPP(station, clampedPower);
     }
 
     station.requestedPower = clampedPower;
@@ -332,6 +342,162 @@ export class ChargingStationManager {
       power: power,
       timestamp: new Date().toISOString()
     }));
+  }
+
+  /**
+   * Initialize OCPP station
+   */
+  async initializeOCPPStation(station) {
+    const { chargePointId } = station.communication;
+
+    // Register message handler for OCPP messages
+    this.ocppDriver.registerMessageHandler(chargePointId, (message) => {
+      this.handleOCPPMessage(station, message);
+    });
+
+    // Check if charge point is connected
+    station.online = this.ocppDriver.isConnected(chargePointId);
+  }
+
+  /**
+   * Handle OCPP message from charge point
+   */
+  handleOCPPMessage(station, message) {
+    const { action, payload } = message;
+
+    switch (action) {
+      case 'StatusNotification':
+        this.handleOCPPStatusNotification(station, payload);
+        break;
+
+      case 'MeterValues':
+        this.handleOCPPMeterValues(station, payload);
+        break;
+
+      case 'StartTransaction':
+        this.handleOCPPStartTransaction(station, payload);
+        break;
+
+      case 'StopTransaction':
+        this.handleOCPPStopTransaction(station, payload);
+        break;
+    }
+  }
+
+  /**
+   * Handle OCPP StatusNotification
+   */
+  handleOCPPStatusNotification(station, payload) {
+    const statusMap = {
+      'Available': 'ready',
+      'Preparing': 'ready',
+      'Charging': 'charging',
+      'SuspendedEV': 'charging',
+      'SuspendedEVSE': 'ready',
+      'Finishing': 'charging',
+      'Reserved': 'ready',
+      'Unavailable': 'unavailable',
+      'Faulted': 'error'
+    };
+
+    const newStatus = statusMap[payload.status] || 'offline';
+
+    if (newStatus !== station.status) {
+      station.status = newStatus;
+      station.online = newStatus !== 'offline';
+
+      this.state.broadcast({
+        type: 'station.updated',
+        data: {
+          id: station.id,
+          status: station.status,
+          online: station.online
+        }
+      });
+    }
+  }
+
+  /**
+   * Handle OCPP MeterValues
+   */
+  handleOCPPMeterValues(station, payload) {
+    const meterValues = payload.meterValue || [];
+
+    for (const meterValue of meterValues) {
+      const sampledValues = meterValue.sampledValue || [];
+
+      for (const sample of sampledValues) {
+        if (sample.measurand === 'Power.Active.Import') {
+          // Power in W, convert to kW
+          station.currentPower = parseFloat(sample.value) / 1000;
+        } else if (sample.measurand === 'Energy.Active.Import.Register') {
+          // Energy in Wh, convert to kWh
+          station.sessionEnergy = parseFloat(sample.value) / 1000;
+        }
+      }
+    }
+
+    station.lastUpdate = new Date().toISOString();
+  }
+
+  /**
+   * Handle OCPP StartTransaction
+   */
+  handleOCPPStartTransaction(station, payload) {
+    station.status = 'charging';
+    station.chargingStartedAt = new Date().toISOString();
+    station.sessionEnergy = 0;
+
+    // Store transaction ID
+    this.ocppTransactions.set(station.id, payload.transactionId);
+
+    this.state.broadcast({
+      type: 'station.session.started',
+      data: {
+        stationId: station.id,
+        transactionId: payload.transactionId,
+        timestamp: station.chargingStartedAt
+      }
+    });
+
+    // Trigger load rebalancing
+    if (this.state.loadManager) {
+      this.state.loadManager.balanceLoad();
+    }
+  }
+
+  /**
+   * Handle OCPP StopTransaction
+   */
+  handleOCPPStopTransaction(station, payload) {
+    station.status = 'ready';
+    station.chargingStartedAt = null;
+
+    const transactionId = this.ocppTransactions.get(station.id);
+    this.ocppTransactions.delete(station.id);
+
+    this.state.broadcast({
+      type: 'station.session.stopped',
+      data: {
+        stationId: station.id,
+        transactionId: transactionId,
+        energyDelivered: station.sessionEnergy
+      }
+    });
+
+    // Trigger load rebalancing
+    if (this.state.loadManager) {
+      this.state.loadManager.balanceLoad();
+    }
+  }
+
+  /**
+   * Set power via OCPP
+   */
+  async setPowerOCPP(station, power) {
+    const { chargePointId, connectorId = 1 } = station.communication;
+
+    await this.ocppDriver.setChargingPower(chargePointId, power, connectorId);
   }
 
   /**
@@ -491,6 +657,10 @@ export class ChargingStationManager {
     // Disconnect protocols
     if (this.mqttDriver) {
       await this.mqttDriver.disconnect();
+    }
+
+    if (this.ocppDriver) {
+      await this.ocppDriver.stop();
     }
 
     console.log('🔌 Charging Station Manager shut down');
