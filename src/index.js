@@ -20,6 +20,7 @@ import failSafeManager from './services/FailSafeManager.js';
 import loadSheddingService from './services/LoadSheddingService.js';
 import siteConstraintsManager from './services/SiteConstraintsManager.js';
 import auditLogger from './services/AuditLogger.js';
+import demoModeService from './services/DemoModeService.js';
 
 // Import API routes
 import stationsRouter from './api/stations.js';
@@ -93,6 +94,9 @@ state.stationManager = new ChargingStationManager(state);
 state.loadManager = new LoadManager(state);
 state.pvManager = new PVManager(state);
 state.scheduleManager = new ScheduleManager(state);
+
+// Initialize demo mode service with state reference
+demoModeService.initialize(state);
 
 // Initialize enhanced services
 async function initializeEnhancedServices() {

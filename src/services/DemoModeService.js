@@ -24,6 +24,17 @@ class DemoModeService {
     this.simulatedVehicles = new Map();
     this.timeMultiplier = 1; // Speed up time (1 = real-time, 10 = 10x speed)
     this.startTime = null;
+
+    // References to app state (will be set by initialize)
+    this.state = null;
+  }
+
+  /**
+   * Initialize demo mode with app state
+   */
+  initialize(state) {
+    this.state = state;
+    console.log('[Demo] Initialized with app state');
   }
 
   /**
@@ -485,7 +496,21 @@ class DemoModeService {
       currentSoC: config.initialSoC,
       temperature: config.initialTemp || 25,
       sessionStart: Date.now(),
-      energyDelivered: 0
+      energyDelivered: 0,
+      sessionEnergy: 0,
+      user: null,
+      vehicle: null,
+      rfidCard: null,
+      location: 'Demo Lot',
+      zone: 'demo',
+      scheduledCharging: false,
+      requestedPower: config.maxPower,
+      minPower: config.minPower || 3.7,
+      manufacturer: 'Demo',
+      model: `${config.type.toUpperCase()} Demo`,
+      firmwareVersion: '1.0.0-demo',
+      serialNumber: `DEMO-${config.id}`,
+      communication: {}
     };
 
     // Discover capabilities
@@ -496,6 +521,20 @@ class DemoModeService {
     );
 
     this.simulatedStations.set(config.id, station);
+
+    // Register with state.stations if available
+    if (this.state && this.state.stations) {
+      this.state.stations.set(config.id, station);
+      console.log(`[Demo] Registered station with state: ${config.name}`);
+
+      // Broadcast station registration
+      if (this.state.broadcast) {
+        this.state.broadcast({
+          type: 'station.registered',
+          data: station
+        });
+      }
+    }
 
     console.log(`[Demo] Created simulated station: ${config.name}`);
   }
@@ -593,6 +632,7 @@ class DemoModeService {
     const energyAdded = (station.currentPower / 60) * deltaTime; // kWh
     station.currentSoC += (energyAdded / batteryCapacity) * 100;
     station.energyDelivered += energyAdded;
+    station.sessionEnergy = station.energyDelivered;
 
     // Clamp SoC
     station.currentSoC = Math.max(0, Math.min(100, station.currentSoC));
@@ -615,6 +655,19 @@ class DemoModeService {
     if (station.currentSoC >= station.targetSoC) {
       station.status = 'ready';
       station.currentPower = 0;
+    }
+
+    // Update state.stations if available
+    if (this.state && this.state.stations) {
+      this.state.stations.set(station.id, station);
+
+      // Broadcast station update via WebSocket
+      if (this.state.broadcast) {
+        this.state.broadcast({
+          type: 'station.updated',
+          data: station
+        });
+      }
     }
   }
 
@@ -656,6 +709,19 @@ class DemoModeService {
         powerFactor: 0.95,
         frequency: 60.0
       });
+    }
+
+    // Update state.energyMeters if available
+    if (this.state && this.state.energyMeters) {
+      this.state.energyMeters.set(meter.id, meter);
+
+      // Broadcast meter update via WebSocket
+      if (this.state.broadcast) {
+        this.state.broadcast({
+          type: 'meter.updated',
+          data: meter
+        });
+      }
     }
   }
 
