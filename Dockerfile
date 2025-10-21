@@ -12,8 +12,8 @@ RUN npm install --production
 # Copy application source
 COPY src ./src
 
-# Create directories for persistence and logs
-RUN mkdir -p /app/persistence /app/logs
+# Create directories for persistence, logs, and uploads
+RUN mkdir -p /app/persistence /app/logs /app/uploads
 
 # Expose ports
 EXPOSE 3000 3001 9000

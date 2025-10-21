@@ -107,20 +107,36 @@ const AIMeterUploadModal = ({ isOpen, onClose, onMeterCreated }) => {
     try {
       setIsUploading(true);
 
-      // Create the meter directly
-      const response = await fetch('http://localhost:3000/api/energy-meters', {
+      // First, finalize the configuration with the backend
+      const finalizeResponse = await fetch('http://localhost:3000/api/ai-meter/finalize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editedConfig)
+        body: JSON.stringify({
+          extracted: aiResponse.extracted,
+          userInput: editedConfig
+        })
       });
 
-      const result = await response.json();
+      const finalizeResult = await finalizeResponse.json();
 
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to create meter');
+      if (!finalizeResult.success) {
+        throw new Error(finalizeResult.error || 'Failed to finalize configuration');
       }
 
-      onMeterCreated(result.data);
+      // Then create the meter
+      const meterResponse = await fetch('http://localhost:3000/api/energy-meters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalizeResult.data)
+      });
+
+      const meterResult = await meterResponse.json();
+
+      if (!meterResult.success) {
+        throw new Error(meterResult.error || 'Failed to create meter');
+      }
+
+      onMeterCreated(meterResult.data);
       handleClose();
     } catch (err) {
       setError(err.message);

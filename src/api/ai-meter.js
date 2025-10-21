@@ -92,4 +92,44 @@ router.post('/upload', upload.single('manual'), async (req, res) => {
   }
 });
 
+/**
+ * POST /api/ai-meter/finalize
+ * Finalize meter configuration with user edits
+ */
+router.post('/finalize', async (req, res) => {
+  try {
+    const { extracted, userInput } = req.body;
+
+    if (!userInput) {
+      return res.status(400).json({
+        success: false,
+        error: 'User input is required'
+      });
+    }
+
+    console.log(`✅ Finalizing meter configuration: ${userInput.name}`);
+
+    // Merge extracted data with user edits
+    const finalConfig = {
+      name: userInput.name,
+      protocol: userInput.protocol || 'modbus',
+      meterType: userInput.meterType || 'building',
+      pollInterval: parseInt(userInput.pollInterval) || 5000,
+      communication: userInput.communication
+    };
+
+    res.json({
+      success: true,
+      data: finalConfig
+    });
+
+  } catch (error) {
+    console.error('❌ AI meter finalization error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to finalize meter configuration'
+    });
+  }
+});
+
 export default router;
