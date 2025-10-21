@@ -5,6 +5,7 @@ import Icons from '../components/Icons';
 import StationModal from '../components/StationModal';
 import AIUploadModal from '../components/AIUploadModal';
 import EnergyMeterModal from '../components/EnergyMeterModal';
+import AIMeterUploadModal from '../components/AIMeterUploadModal';
 
 export default function Settings() {
   const [config, setConfig] = useState(null);
@@ -15,6 +16,7 @@ export default function Settings() {
   const [showStationModal, setShowStationModal] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
   const [showMeterModal, setShowMeterModal] = useState(false);
+  const [showAIMeterModal, setShowAIMeterModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const { data } = useWebSocket();
 
@@ -117,6 +119,10 @@ export default function Settings() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAIMeterCreated = async () => {
+    await loadEnergyMeters();
   };
 
   const handleDeleteMeter = async (meterId, meterName) => {
@@ -311,10 +317,16 @@ export default function Settings() {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Energy Meters</h2>
-          <button className="btn btn-primary" onClick={() => setShowMeterModal(true)}>
-            <Icons.Plus size={18} />
-            Add Meter
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+            <button className="btn btn-secondary" onClick={() => setShowAIMeterModal(true)}>
+              <Icons.Sparkles size={18} />
+              AI Setup
+            </button>
+            <button className="btn btn-primary" onClick={() => setShowMeterModal(true)}>
+              <Icons.Plus size={18} />
+              Add Meter
+            </button>
+          </div>
         </div>
 
         {energyMeters.length === 0 ? (
@@ -386,6 +398,12 @@ export default function Settings() {
         isOpen={showMeterModal}
         onClose={() => setShowMeterModal(false)}
         onSubmit={handleAddMeter}
+      />
+
+      <AIMeterUploadModal
+        isOpen={showAIMeterModal}
+        onClose={() => setShowAIMeterModal(false)}
+        onMeterCreated={handleAIMeterCreated}
       />
     </div>
   );

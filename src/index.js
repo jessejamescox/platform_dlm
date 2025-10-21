@@ -21,6 +21,7 @@ import energyRouter from './api/energy.js';
 import schedulesRouter from './api/schedules.js';
 import analyticsRouter from './api/analytics.js';
 import aiConfigRouter from './api/ai-config.js';
+import aiMeterRouter from './api/ai-meter.js';
 import energyMetersRouter from './api/energy-meters.js';
 
 // Load environment variables
@@ -105,6 +106,7 @@ app.use('/api/energy', energyRouter);
 app.use('/api/schedules', schedulesRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/ai-config', aiConfigRouter);
+app.use('/api/ai-meter', aiMeterRouter);
 app.use('/api/energy-meters', energyMetersRouter(state.energyMeterManager));
 
 // System info endpoint
