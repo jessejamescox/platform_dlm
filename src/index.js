@@ -14,6 +14,13 @@ import { DataLogger } from './services/DataLogger.js';
 import { StatePersistence } from './persistence/StatePersistence.js';
 import EnergyMeterManager from './services/EnergyMeterManager.js';
 
+// Import enhanced services
+import healthCheckService from './services/HealthCheckService.js';
+import failSafeManager from './services/FailSafeManager.js';
+import loadSheddingService from './services/LoadSheddingService.js';
+import siteConstraintsManager from './services/SiteConstraintsManager.js';
+import auditLogger from './services/AuditLogger.js';
+
 // Import API routes
 import stationsRouter from './api/stations.js';
 import loadRouter from './api/load.js';
@@ -23,6 +30,11 @@ import analyticsRouter from './api/analytics.js';
 import aiConfigRouter from './api/ai-config.js';
 import aiMeterRouter from './api/ai-meter.js';
 import energyMetersRouter from './api/energy-meters.js';
+import healthRouter from './api/health.js';
+import controlRouter from './api/control.js';
+
+// Import middleware
+import { rateLimiters } from './middleware/rateLimiter.js';
 
 // Load environment variables
 dotenv.config();
@@ -41,6 +53,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply rate limiting to API routes
+app.use('/api/', rateLimiters.standard);
 
 // Global state object (similar to project_ember pattern)
 export const state = {
@@ -78,6 +93,54 @@ state.loadManager = new LoadManager(state);
 state.pvManager = new PVManager(state);
 state.scheduleManager = new ScheduleManager(state);
 
+// Initialize enhanced services
+async function initializeEnhancedServices() {
+  console.log('[Init] Initializing enhanced services...');
+
+  // Register health checks
+  healthCheckService.registerStandardChecks({
+    loadManager: state.loadManager,
+    stationManager: state.stationManager,
+    dataLogger: state.dataLogger
+  });
+
+  healthCheckService.startPeriodicChecks(30000); // 30s interval
+
+  // Configure site constraints
+  siteConstraintsManager.configureService({
+    maxPower: state.config.maxGridCapacity,
+    maxCurrent: parseInt(process.env.MAX_SERVICE_CURRENT) || 400,
+    voltage: parseInt(process.env.SERVICE_VOLTAGE) || 480,
+    phases: parseInt(process.env.SERVICE_PHASES) || 3,
+    maxImbalance: parseFloat(process.env.MAX_PHASE_IMBALANCE) || 0.10,
+    minPowerFactor: parseFloat(process.env.MIN_POWER_FACTOR) || 0.90,
+    frequency: parseInt(process.env.SERVICE_FREQUENCY) || 60,
+    nec625Factor: parseFloat(process.env.NEC625_CONTINUOUS_FACTOR) || 0.80
+  });
+
+  // Configure load shedding
+  if (process.env.ENABLE_LOAD_SHEDDING === 'true') {
+    loadSheddingService.updateHysteresis({
+      upperThreshold: parseFloat(process.env.LOAD_SHEDDING_UPPER_THRESHOLD) || 0.95,
+      lowerThreshold: parseFloat(process.env.LOAD_SHEDDING_LOWER_THRESHOLD) || 0.85
+    });
+    console.log('[Init] Load shedding enabled');
+  }
+
+  // Start fail-safe monitoring
+  if (process.env.ENABLE_FAIL_SAFE === 'true') {
+    failSafeManager.startHeartbeat(10000); // 10s interval
+    console.log('[Init] Fail-safe monitoring enabled');
+  }
+
+  console.log('[Init] Enhanced services initialized successfully');
+}
+
+// Initialize enhanced services on startup
+initializeEnhancedServices().catch(error => {
+  console.error('[Init] Failed to initialize enhanced services:', error);
+});
+
 // WebSocket broadcast function
 state.broadcast = (message) => {
   const data = JSON.stringify(message);
@@ -99,7 +162,24 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Health check endpoints (before other routes, no rate limiting)
+app.get('/health', async (req, res) => {
+  const health = await healthCheckService.getSystemHealth();
+  res.status(health.status === 'healthy' ? 200 : 503).json(health);
+});
+
+app.get('/health/live', async (req, res) => {
+  res.json(await healthCheckService.getLiveness());
+});
+
+app.get('/health/ready', async (req, res) => {
+  const readiness = await healthCheckService.getReadiness();
+  res.status(readiness.status === 'ready' ? 200 : 503).json(readiness);
+});
+
 // API Routes
+app.use('/api/health', healthRouter);
+app.use('/api/control', controlRouter);
 app.use('/api/stations', stationsRouter);
 app.use('/api/load', loadRouter);
 app.use('/api/energy', energyRouter);
@@ -125,11 +205,40 @@ app.get('/api/system/info', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+
+  // Audit log errors
+  auditLogger.logError('http_error', err, {
+    method: req.method,
+    path: req.path,
+    ip: req.ip
+  });
+
   res.status(500).json({
     success: false,
     error: err.message || 'Internal server error'
   });
 });
+
+// Graceful shutdown handler
+async function gracefulShutdown(signal) {
+  console.log(`\n[Shutdown] ${signal} received, shutting down gracefully...`);
+
+  // Stop health checks
+  healthCheckService.stopPeriodicChecks();
+
+  // Stop fail-safe monitoring
+  failSafeManager.stopHeartbeat();
+
+  // Flush audit logs
+  await auditLogger.shutdown();
+
+  console.log('[Shutdown] Graceful shutdown complete');
+  process.exit(0);
+}
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start Express server
 app.listen(PORT, () => {
@@ -140,9 +249,13 @@ app.listen(PORT, () => {
   console.log(`📊 Max Grid Capacity: ${state.config.maxGridCapacity} kW`);
   console.log(`⚡ Load Balancing: ${state.config.enableLoadBalancing ? 'Enabled' : 'Disabled'}`);
   console.log(`☀️  PV Integration: ${state.config.pvSystemEnabled ? 'Enabled' : 'Disabled'}`);
+  console.log(`🛡️  Enhanced Features: Safety, Control Primitives, Site Constraints`);
   console.log(`\n📡 Endpoints:`);
   console.log(`   - Health: http://localhost:${PORT}/health`);
+  console.log(`   - Liveness: http://localhost:${PORT}/health/live`);
+  console.log(`   - Readiness: http://localhost:${PORT}/health/ready`);
   console.log(`   - API: http://localhost:${PORT}/api/`);
+  console.log(`   - Control: http://localhost:${PORT}/api/control/`);
   console.log(`   - WebSocket: ws://localhost:${WS_PORT}`);
   console.log('');
 });
