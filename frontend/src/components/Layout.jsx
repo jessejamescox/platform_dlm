@@ -8,7 +8,6 @@ export default function Layout({ children }) {
 
   const navItems = [
     { path: '/', icon: Icons.Dashboard, label: 'Dashboard' },
-    { path: '/stations', icon: Icons.BatteryCharging, label: 'Charging Stations' },
     { path: '/load', icon: Icons.Zap, label: 'Load Management' },
     { path: '/energy', icon: Icons.Sun, label: 'Energy & PV' },
     { path: '/schedules', icon: Icons.Calendar, label: 'Schedules' },

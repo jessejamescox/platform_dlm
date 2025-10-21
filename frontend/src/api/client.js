@@ -86,6 +86,17 @@ export const analyticsAPI = {
   getZones: () => request('/analytics/zones')
 };
 
+// Energy Meters API
+export const energyMetersAPI = {
+  getAll: () => request('/energy-meters'),
+  getById: (id) => request(`/energy-meters/${id}`),
+  create: (data) => request('/energy-meters', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`/energy-meters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => request(`/energy-meters/${id}`, { method: 'DELETE' }),
+  getReading: (id) => request(`/energy-meters/${id}/reading`),
+  getBuildingConsumption: () => request('/energy-meters/consumption/building')
+};
+
 // System API
 export const systemAPI = {
   getInfo: () => request('/system/info'),
