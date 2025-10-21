@@ -147,57 +147,19 @@ export default function StationModal({ isOpen, onClose, onSubmit }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      padding: 'var(--spacing-lg)'
-    }}>
-      <div style={{
-        background: 'var(--surface)',
-        borderRadius: 'var(--radius-lg)',
-        maxWidth: '600px',
-        width: '100%',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        boxShadow: 'var(--shadow-xl)'
-      }}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: 'var(--spacing-lg)',
-          borderBottom: '1px solid var(--border)'
-        }}>
-          <h2 style={{ margin: 0 }}>Add Charging Station</h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+        <div className="modal-header">
+          <h2 className="modal-title">Add Charging Station</h2>
+          <button className="modal-close" onClick={onClose}>
             <Icons.X size={20} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ padding: 'var(--spacing-lg)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             {/* Basic Information */}
             <div>
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
@@ -770,26 +732,17 @@ export default function StationModal({ isOpen, onClose, onSubmit }) {
             </details>
           </div>
 
-          {/* Actions */}
-          <div style={{
-            display: 'flex',
-            gap: 'var(--spacing-md)',
-            marginTop: 'var(--spacing-xl)',
-            paddingTop: 'var(--spacing-lg)',
-            borderTop: '1px solid var(--border)'
-          }}>
+          <div className="modal-footer">
             <button
               type="button"
               onClick={onClose}
               className="btn btn-secondary"
-              style={{ flex: 1 }}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ flex: 1 }}
             >
               <Icons.CheckCircle size={18} />
               Add Station
