@@ -83,18 +83,21 @@ class RateLimiter {
       this.addHeaders(res, client);
 
       // Handle successful/failed requests
-      const originalSend = res.send;
-      res.send = function(data) {
-        const statusCode = res.statusCode;
+      if (this.skipSuccessfulRequests || this.skipFailedRequests) {
+        const originalSend = res.send.bind(res);
+        const self = this;
+        res.send = function(data) {
+          const statusCode = res.statusCode;
 
-        // Decrement count if skipping successful/failed requests
-        if ((statusCode < 400 && this.skipSuccessfulRequests) ||
-            (statusCode >= 400 && this.skipFailedRequests)) {
-          client.count--;
-        }
+          // Decrement count if skipping successful/failed requests
+          if ((statusCode < 400 && self.skipSuccessfulRequests) ||
+              (statusCode >= 400 && self.skipFailedRequests)) {
+            client.count--;
+          }
 
-        return originalSend.call(this, data);
-      }.bind(this);
+          return originalSend(data);
+        };
+      }
 
       next();
     };

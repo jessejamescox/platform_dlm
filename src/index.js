@@ -32,6 +32,7 @@ import aiMeterRouter from './api/ai-meter.js';
 import energyMetersRouter from './api/energy-meters.js';
 import healthRouter from './api/health.js';
 import controlRouter from './api/control.js';
+import demoRouter from './api/demo.js';
 
 // Import middleware
 import { rateLimiters } from './middleware/rateLimiter.js';
@@ -178,6 +179,7 @@ app.get('/health/ready', async (req, res) => {
 });
 
 // API Routes
+app.use('/api/demo', demoRouter);
 app.use('/api/health', healthRouter);
 app.use('/api/control', controlRouter);
 app.use('/api/stations', stationsRouter);
