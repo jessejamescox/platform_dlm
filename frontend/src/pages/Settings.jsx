@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { systemAPI, loadAPI } from '../api/client';
-import { Settings as SettingsIcon, Save } from 'lucide-react';
+import Icons from '../components/Icons';
 
 export default function Settings() {
   const [config, setConfig] = useState(null);
@@ -51,7 +51,7 @@ export default function Settings() {
         <div className="card">
           <div className="card-header">
             <h3 className="card-title">Grid Configuration</h3>
-            <SettingsIcon size={20} />
+            <Icons.Settings size={20} />
           </div>
           <div className="card-body">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
@@ -96,7 +96,7 @@ export default function Settings() {
               </div>
 
               <button onClick={handleSave} className="btn btn-primary">
-                <Save size={18} />
+                <Icons.Save size={18} />
                 Save Changes
               </button>
             </div>

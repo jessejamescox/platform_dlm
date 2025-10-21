@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { analyticsAPI, systemAPI } from '../api/client';
-import {
-  BatteryCharging,
-  Zap,
-  TrendingUp,
-  Sun,
-  Activity,
-  AlertCircle
-} from 'lucide-react';
+import Icons from '../components/Icons';
 
 export default function Dashboard() {
   const [overview, setOverview] = useState(null);
@@ -50,43 +43,37 @@ export default function Dashboard() {
     {
       label: 'Total Stations',
       value: overview.totalStations,
-      icon: BatteryCharging,
-      color: '#6366f1',
+      icon: Icons.BatteryCharging,
       subValue: `${overview.activeStations} charging`
     },
     {
       label: 'Current Load',
       value: `${overview.currentLoad.toFixed(1)} kW`,
-      icon: Zap,
-      color: '#f59e0b',
+      icon: Icons.Zap,
       subValue: `${overview.utilizationPercent.toFixed(1)}% utilized`
     },
     {
       label: 'Available Capacity',
       value: `${overview.availableCapacity.toFixed(1)} kW`,
-      icon: Activity,
-      color: '#10b981',
+      icon: Icons.Activity,
       subValue: `of ${systemInfo.config.maxGridCapacity} kW`
     },
     {
       label: 'PV Production',
       value: overview.pvEnabled ? `${overview.pvProduction.toFixed(1)} kW` : 'Disabled',
-      icon: Sun,
-      color: '#f59e0b',
+      icon: Icons.Sun,
       subValue: overview.pvEnabled ? 'Solar active' : 'Not configured'
     },
     {
       label: 'Total Energy',
       value: `${overview.totalEnergyDelivered.toFixed(2)} kWh`,
-      icon: TrendingUp,
-      color: '#06b6d4',
+      icon: Icons.TrendingUp,
       subValue: 'All time'
     },
     {
       label: 'System Status',
       value: connected ? 'Online' : 'Offline',
-      icon: AlertCircle,
-      color: connected ? '#10b981' : '#ef4444',
+      icon: Icons.AlertCircle,
       subValue: overview.loadBalancingEnabled ? 'Balancing active' : 'Manual mode'
     }
   ];
@@ -105,13 +92,7 @@ export default function Dashboard() {
         {stats.map((stat, index) => (
           <div key={index} className="stat-card">
             <div className="stat-header">
-              <div
-                className="stat-icon"
-                style={{
-                  background: `linear-gradient(135deg, ${stat.color}, ${stat.color}dd)`,
-                  color: 'white'
-                }}
-              >
+              <div className="stat-icon">
                 <stat.icon size={24} />
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { loadAPI } from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Zap, TrendingUp, AlertTriangle } from 'lucide-react';
+import Icons from '../components/Icons';
 
 export default function LoadManagement() {
   const [loadStatus, setLoadStatus] = useState(null);
@@ -52,8 +52,8 @@ export default function LoadManagement() {
       <div className="grid grid-3" style={{ marginBottom: 'var(--spacing-xl)' }}>
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white' }}>
-              <Zap size={24} />
+            <div className="stat-icon">
+              <Icons.Zap size={24} />
             </div>
           </div>
           <div className="stat-value">{capacity.currentLoad.toFixed(1)} kW</div>
@@ -62,8 +62,8 @@ export default function LoadManagement() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
-              <TrendingUp size={24} />
+            <div className="stat-icon">
+              <Icons.TrendingUp size={24} />
             </div>
           </div>
           <div className="stat-value">{capacity.availableCapacity.toFixed(1)} kW</div>
@@ -72,8 +72,8 @@ export default function LoadManagement() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: `linear-gradient(135deg, ${utilizationColor}, ${utilizationColor}dd)`, color: 'white' }}>
-              <AlertTriangle size={24} />
+            <div className="stat-icon">
+              <Icons.AlertTriangle size={24} />
             </div>
           </div>
           <div className="stat-value">{capacity.utilizationPercent.toFixed(1)}%</div>

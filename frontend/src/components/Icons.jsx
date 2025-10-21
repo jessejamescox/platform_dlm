@@ -254,6 +254,53 @@ export const RefreshIcon = ({ size = 24, className = '' }) => (
   </IconWrapper>
 );
 
+// TrendingUp
+export const TrendingUpIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <path d="M23 6l-9.5 9.5-5-5L1 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M17 6h6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </IconWrapper>
+);
+
+// AlertTriangle
+export const AlertTriangleIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 9v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </IconWrapper>
+);
+
+// Clock
+export const ClockIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </IconWrapper>
+);
+
+// DollarSign
+export const DollarSignIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </IconWrapper>
+);
+
+// Battery (for Energy page)
+export const BatteryIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <rect x="2" y="7" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="2" />
+    <path d="M18 10h1a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-1" stroke="currentColor" strokeWidth="2" />
+  </IconWrapper>
+);
+
+// Save (floppy disk)
+export const SaveIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </IconWrapper>
+);
+
 export default {
   Dashboard: DashboardIcon,
   BatteryCharging: BatteryChargingIcon,
@@ -283,4 +330,10 @@ export default {
   Copy: CopyIcon,
   Filter: FilterIcon,
   Refresh: RefreshIcon,
+  TrendingUp: TrendingUpIcon,
+  AlertTriangle: AlertTriangleIcon,
+  Clock: ClockIcon,
+  DollarSign: DollarSignIcon,
+  Battery: BatteryIcon,
+  Save: SaveIcon,
 };

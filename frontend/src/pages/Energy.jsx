@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { energyAPI } from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Sun, Battery, TrendingUp, DollarSign } from 'lucide-react';
+import Icons from '../components/Icons';
 
 export default function Energy() {
   const [pvStatus, setPvStatus] = useState(null);
@@ -50,8 +50,8 @@ export default function Energy() {
       <div className="grid grid-4" style={{ marginBottom: 'var(--spacing-xl)' }}>
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white' }}>
-              <Sun size={24} />
+            <div className="stat-icon">
+              <Icons.Sun size={24} />
             </div>
           </div>
           <div className="stat-value">{pvStatus.currentProduction.toFixed(1)} kW</div>
@@ -63,8 +63,8 @@ export default function Energy() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: 'white' }}>
-              <Battery size={24} />
+            <div className="stat-icon">
+              <Icons.Battery size={24} />
             </div>
           </div>
           <div className="stat-value">{consumption.current.toFixed(1)} kW</div>
@@ -73,8 +73,8 @@ export default function Energy() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
-              <TrendingUp size={24} />
+            <div className="stat-icon">
+              <Icons.TrendingUp size={24} />
             </div>
           </div>
           <div className="stat-value">{consumption.total.toFixed(2)} kWh</div>
@@ -83,8 +83,8 @@ export default function Energy() {
 
         <div className="stat-card">
           <div className="stat-header">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white' }}>
-              <DollarSign size={24} />
+            <div className="stat-icon">
+              <Icons.DollarSign size={24} />
             </div>
           </div>
           <div className="stat-value">${costs.totalCost.toFixed(2)}</div>
@@ -116,7 +116,7 @@ export default function Energy() {
             {pvStatus.excessChargingEnabled && (
               <div style={{ marginTop: 'var(--spacing-lg)', padding: 'var(--spacing-md)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                  <Sun size={18} style={{ color: 'var(--warning)' }} />
+                  <Icons.Sun size={18} />
                   <span style={{ fontWeight: 600 }}>Excess Charging Enabled</span>
                 </div>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>

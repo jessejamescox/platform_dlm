@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { schedulesAPI } from '../api/client';
-import { Calendar, Plus, Trash2, Clock } from 'lucide-react';
+import Icons from '../components/Icons';
 
 export default function Schedules() {
   const [schedules, setSchedules] = useState([]);
@@ -28,20 +28,20 @@ export default function Schedules() {
           </p>
         </div>
         <button className="btn btn-primary">
-          <Plus size={18} />
+          <Icons.Plus size={18} />
           Create Schedule
         </button>
       </div>
 
       {schedules.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: 'var(--spacing-xl)' }}>
-          <Calendar size={48} style={{ color: 'var(--text-muted)', margin: '0 auto var(--spacing-md)' }} />
+          <Icons.Calendar size={48} style={{ color: 'var(--text-muted)', margin: '0 auto var(--spacing-md)' }} />
           <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Schedules Found</h3>
           <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--spacing-lg)' }}>
             Create automated schedules for optimal charging management
           </p>
           <button className="btn btn-primary">
-            <Plus size={18} />
+            <Icons.Plus size={18} />
             Create Schedule
           </button>
         </div>
@@ -81,11 +81,11 @@ export default function Schedules() {
 
                 <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
                   <button className="btn btn-secondary" style={{ flex: 1 }}>
-                    <Clock size={16} />
+                    <Icons.Clock size={16} />
                     Edit
                   </button>
                   <button className="btn btn-danger">
-                    <Trash2 size={16} />
+                    <Icons.Trash size={16} />
                   </button>
                 </div>
               </div>

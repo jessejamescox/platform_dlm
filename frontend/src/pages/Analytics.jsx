@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { analyticsAPI } from '../api/client';
-import { BarChart3, TrendingUp, Activity } from 'lucide-react';
+import Icons from '../components/Icons';
 
 export default function Analytics() {
   const [stationAnalytics, setStationAnalytics] = useState([]);
@@ -35,7 +35,7 @@ export default function Analytics() {
       <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
         <div className="card-header">
           <h3 className="card-title">Station Performance</h3>
-          <BarChart3 size={20} />
+          <Icons.Chart size={20} />
         </div>
         <div className="card-body">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
@@ -72,7 +72,7 @@ export default function Analytics() {
             <div key={zone.zone} className="card">
               <div className="card-header">
                 <h3 className="card-title">{zone.zone}</h3>
-                <Activity size={20} />
+                <Icons.Activity size={20} />
               </div>
               <div className="card-body">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
