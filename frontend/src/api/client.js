@@ -102,3 +102,22 @@ export const systemAPI = {
   getInfo: () => request('/system/info'),
   getHealth: () => fetch(API_BASE.replace('/api', '') + '/health').then(r => r.json())
 };
+
+// Demo Mode API
+export const demoAPI = {
+  getScenarios: () => request('/demo/scenarios'),
+  getStatus: () => request('/demo/status'),
+  enable: (scenario, timeMultiplier = 1) => request('/demo/enable', {
+    method: 'POST',
+    body: JSON.stringify({ scenario, timeMultiplier })
+  }),
+  disable: () => request('/demo/disable', { method: 'POST' }),
+  setScenario: (scenario) => request('/demo/scenario', {
+    method: 'POST',
+    body: JSON.stringify({ scenario })
+  }),
+  setSpeed: (timeMultiplier) => request('/demo/speed', {
+    method: 'POST',
+    body: JSON.stringify({ timeMultiplier })
+  })
+};

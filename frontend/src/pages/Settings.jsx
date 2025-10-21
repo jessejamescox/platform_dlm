@@ -6,6 +6,7 @@ import StationModal from '../components/StationModal';
 import AIUploadModal from '../components/AIUploadModal';
 import EnergyMeterModal from '../components/EnergyMeterModal';
 import AIMeterUploadModal from '../components/AIMeterUploadModal';
+import DemoModePanel from '../components/DemoModePanel';
 
 export default function Settings() {
   const [config, setConfig] = useState(null);
@@ -170,6 +171,11 @@ export default function Settings() {
         <p className="page-description">
           Configure system parameters, charging stations, and energy meters
         </p>
+      </div>
+
+      {/* Demo Mode */}
+      <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+        <DemoModePanel />
       </div>
 
       {/* Grid Configuration */}

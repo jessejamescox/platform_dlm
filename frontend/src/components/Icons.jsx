@@ -123,6 +123,13 @@ export const XIcon = ({ size = 24, className = '' }) => (
   </IconWrapper>
 );
 
+// Play
+export const PlayIcon = ({ size = 24, className = '' }) => (
+  <IconWrapper size={size} className={className}>
+    <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
+  </IconWrapper>
+);
+
 // Moon / Dark Mode
 export const MoonIcon = ({ size = 24, className = '' }) => (
   <IconWrapper size={size} className={className}>
@@ -313,6 +320,7 @@ export default {
   Plus: PlusIcon,
   Trash: TrashIcon,
   X: XIcon,
+  Play: PlayIcon,
   Moon: MoonIcon,
   Upload: UploadIcon,
   FileText: FileTextIcon,
