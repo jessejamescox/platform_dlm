@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Save } from 'lucide-react';
+import Icons from './Icons';
 
 export default function StationModal({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -191,7 +191,7 @@ export default function StationModal({ isOpen, onClose, onSubmit }) {
               justifyContent: 'center'
             }}
           >
-            <X size={20} />
+            <Icons.X size={20} />
           </button>
         </div>
 
@@ -791,7 +791,7 @@ export default function StationModal({ isOpen, onClose, onSubmit }) {
               className="btn btn-primary"
               style={{ flex: 1 }}
             >
-              <Save size={18} />
+              <Icons.CheckCircle size={18} />
               Add Station
             </button>
           </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, FileText, AlertCircle, CheckCircle, Loader, X } from 'lucide-react';
+import Icons from './Icons';
 
 const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
   const [step, setStep] = useState('upload'); // upload, processing, review, confirm
@@ -156,7 +156,7 @@ const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
         <div className="modal-header">
           <h2>AI-Powered Station Setup</h2>
           <button className="icon-btn" onClick={handleClose}>
-            <X size={20} />
+            <Icons.X size={20} />
           </button>
         </div>
 
@@ -165,7 +165,7 @@ const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
           {step === 'upload' && (
             <div className="ai-upload-section">
               <div className="upload-area">
-                <Upload size={48} className="upload-icon" />
+                <Icons.Upload size={48} className="upload-icon" />
                 <h3>Upload Charging Station Manual</h3>
                 <p>Upload a PDF, text file, or image of the station's technical documentation</p>
 
@@ -178,13 +178,13 @@ const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
                 />
 
                 <label htmlFor="manual-upload" className="btn btn-primary">
-                  <FileText size={20} />
+                  <Icons.FileText size={20} />
                   Select File
                 </label>
 
                 {selectedFile && (
                   <div className="selected-file">
-                    <CheckCircle size={20} className="text-success" />
+                    <Icons.CheckCircle size={20} className="text-success" />
                     <span>{selectedFile.name}</span>
                     <span className="file-size">
                       ({(selectedFile.size / 1024).toFixed(2)} KB)
@@ -206,7 +206,7 @@ const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
 
               {error && (
                 <div className="alert alert-danger">
-                  <AlertCircle size={20} />
+                  <Icons.AlertCircle size={20} />
                   {error}
                 </div>
               )}
@@ -216,16 +216,16 @@ const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
           {/* Step 2: Processing */}
           {step === 'processing' && (
             <div className="processing-section">
-              <Loader size={48} className="spinner" />
+              <Icons.Loader size={48} className="spinner" />
               <h3>Analyzing Manual...</h3>
               <p>AI is extracting configuration parameters from your document</p>
               <div className="processing-steps">
                 <div className="processing-step active">
-                  <CheckCircle size={20} />
+                  <Icons.CheckCircle size={20} />
                   <span>Extracting text</span>
                 </div>
                 <div className="processing-step active">
-                  <Loader size={20} className="spinner-small" />
+                  <Icons.Loader size={20} className="spinner-small" />
                   <span>Analyzing with AI</span>
                 </div>
                 <div className="processing-step">
@@ -383,7 +383,7 @@ const AIUploadModal = ({ isOpen, onClose, onStationCreated }) => {
 
           {error && step === 'review' && (
             <div className="alert alert-danger">
-              <AlertCircle size={20} />
+              <Icons.AlertCircle size={20} />
               {error}
             </div>
           )}

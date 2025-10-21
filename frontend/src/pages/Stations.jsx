@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { stationsAPI } from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { BatteryCharging, Plus, Trash2, Power, Sparkles } from 'lucide-react';
+import Icons from '../components/Icons';
 import StationModal from '../components/StationModal';
 import AIUploadModal from '../components/AIUploadModal';
 
@@ -84,11 +84,11 @@ export default function Stations() {
         </div>
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
           <button className="btn btn-secondary" onClick={() => setShowAIModal(true)}>
-            <Sparkles size={18} />
+            <Icons.Sparkles size={18} />
             AI Setup
           </button>
           <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <Plus size={18} />
+            <Icons.Plus size={18} />
             Add Station
           </button>
         </div>
@@ -96,18 +96,18 @@ export default function Stations() {
 
       {stations.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: 'var(--spacing-xl)' }}>
-          <BatteryCharging size={48} style={{ color: 'var(--text-muted)', margin: '0 auto var(--spacing-md)' }} />
+          <Icons.BatteryCharging size={48} style={{ color: 'var(--text-muted)', margin: '0 auto var(--spacing-md)' }} />
           <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Stations Found</h3>
           <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--spacing-lg)' }}>
             Get started by adding your first charging station manually or use AI to parse a manual
           </p>
           <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'center' }}>
             <button className="btn btn-secondary" onClick={() => setShowAIModal(true)}>
-              <Sparkles size={18} />
+              <Icons.Sparkles size={18} />
               AI Setup
             </button>
             <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-              <Plus size={18} />
+              <Icons.Plus size={18} />
               Add Station
             </button>
           </div>
@@ -169,14 +169,14 @@ export default function Stations() {
 
                 <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
                   <button className="btn btn-secondary" style={{ flex: 1 }}>
-                    <Power size={16} />
+                    <Icons.Power size={16} />
                     Details
                   </button>
                   <button
                     className="btn btn-danger"
                     onClick={() => handleDeleteStation(station.id, station.name)}
                   >
-                    <Trash2 size={16} />
+                    <Icons.Trash size={16} />
                   </button>
                 </div>
               </div>
