@@ -92,9 +92,20 @@ export class LoadManager {
       baseCapacity += this.state.currentLoad.pvProduction;
     }
 
-    // Subtract other building loads (simulated for now)
-    const otherLoads = this.state.currentLoad.gridConsumption || 0;
-    const available = baseCapacity - otherLoads;
+    // Subtract actual building consumption from energy meters (if available)
+    let buildingLoad = 0;
+    if (this.state.energyMeterManager) {
+      const consumption = this.state.energyMeterManager.getBuildingConsumption();
+      buildingLoad = consumption.currentPower || 0;
+    } else {
+      // Fallback to simulated/estimated consumption
+      buildingLoad = this.state.currentLoad.gridConsumption || 0;
+    }
+
+    // Update state with actual building consumption
+    this.state.currentLoad.buildingConsumption = buildingLoad;
+
+    const available = baseCapacity - buildingLoad;
 
     return Math.max(0, available);
   }

@@ -12,6 +12,7 @@ import { PVManager } from './services/PVManager.js';
 import { ScheduleManager } from './services/ScheduleManager.js';
 import { DataLogger } from './services/DataLogger.js';
 import { StatePersistence } from './persistence/StatePersistence.js';
+import EnergyMeterManager from './services/EnergyMeterManager.js';
 
 // Import API routes
 import stationsRouter from './api/stations.js';
@@ -20,6 +21,7 @@ import energyRouter from './api/energy.js';
 import schedulesRouter from './api/schedules.js';
 import analyticsRouter from './api/analytics.js';
 import aiConfigRouter from './api/ai-config.js';
+import energyMetersRouter from './api/energy-meters.js';
 
 // Load environment variables
 dotenv.config();
@@ -43,6 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 export const state = {
   stations: new Map(),
   schedules: new Map(),
+  energyMeters: new Map(),
   clients: new Set(),
   config: {
     maxGridCapacity: parseFloat(process.env.MAX_GRID_CAPACITY_KW) || 500,
@@ -60,6 +63,7 @@ export const state = {
     available: 0,
     pvProduction: 0,
     gridConsumption: 0,
+    buildingConsumption: 0,
     chargingLoad: 0
   }
 };
@@ -67,6 +71,7 @@ export const state = {
 // Initialize services
 state.persistence = new StatePersistence(join(__dirname, '..', 'persistence'));
 state.dataLogger = new DataLogger();
+state.energyMeterManager = new EnergyMeterManager(state, state.dataLogger);
 state.stationManager = new ChargingStationManager(state);
 state.loadManager = new LoadManager(state);
 state.pvManager = new PVManager(state);
@@ -100,6 +105,7 @@ app.use('/api/energy', energyRouter);
 app.use('/api/schedules', schedulesRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/ai-config', aiConfigRouter);
+app.use('/api/energy-meters', energyMetersRouter(state.energyMeterManager));
 
 // System info endpoint
 app.get('/api/system/info', (req, res) => {
@@ -173,6 +179,7 @@ console.log(`🔌 WebSocket server running on port ${WS_PORT}\n`);
 await state.persistence.load(state);
 
 // Initialize services
+await state.energyMeterManager.initialize();
 await state.stationManager.initialize();
 await state.loadManager.initialize();
 await state.pvManager.initialize();
@@ -185,6 +192,7 @@ process.on('SIGINT', async () => {
   console.log('\n🛑 Shutting down gracefully...');
 
   await state.persistence.save(state);
+  await state.energyMeterManager.shutdown();
   await state.stationManager.shutdown();
   await state.pvManager.shutdown();
 
@@ -196,6 +204,7 @@ process.on('SIGTERM', async () => {
   console.log('\n🛑 Shutting down gracefully...');
 
   await state.persistence.save(state);
+  await state.energyMeterManager.shutdown();
   await state.stationManager.shutdown();
   await state.pvManager.shutdown();
 

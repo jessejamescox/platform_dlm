@@ -136,6 +136,31 @@ export class DataLogger {
   }
 
   /**
+   * Log energy meter reading
+   */
+  logMeterReading(reading) {
+    if (!this.enabled) return;
+
+    try {
+      const point = new Point('meter_reading')
+        .tag('meter_id', reading.meterId)
+        .tag('meter_name', reading.meterName)
+        .tag('meter_type', reading.meterType)
+        .tag('location', reading.location)
+        .floatField('power', reading.power || 0)
+        .floatField('total_energy', reading.totalEnergy || 0)
+        .floatField('voltage', reading.voltage || 0)
+        .floatField('current', reading.current || 0)
+        .floatField('power_factor', reading.powerFactor || 1.0)
+        .timestamp(new Date(reading.timestamp || Date.now()));
+
+      this.writeApi.writePoint(point);
+    } catch (error) {
+      console.error('Error logging meter reading:', error);
+    }
+  }
+
+  /**
    * Flush pending writes
    */
   async flush() {
