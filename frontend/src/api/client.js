@@ -118,6 +118,6 @@ export const demoAPI = {
   }),
   setSpeed: (timeMultiplier) => request('/demo/speed', {
     method: 'POST',
-    body: JSON.stringify({ timeMultiplier })
+    body: JSON.stringify({ multiplier: timeMultiplier })
   })
 };
